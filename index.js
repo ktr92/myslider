@@ -9,6 +9,7 @@ document.querySelectorAll("[data-myslider='slidercontainer']").forEach($sliderwr
   const $slider = $sliderwrapper.querySelector("[data-myslider='slider']")
   let slideWIdth =  window.innerWidth / settings.slides
   let slidesCount = $slider.querySelectorAll("[data-myslider='slide']").length
+  const sectionCount = Math.ceil(slidesCount / settings.slides)
   $slider.style.width = slideWIdth * slidesCount + 'px'
   let index = 0
   $slider.querySelectorAll("[data-myslider='slide']").forEach($slide => {
@@ -19,17 +20,20 @@ document.querySelectorAll("[data-myslider='slidercontainer']").forEach($sliderwr
 
   let position = $slider.style.left
   let sliderRest = slidesCount - settings.slides
+  let currentSlideId = 0
   const move = (dir, step) => {
       if (dir === 'next') {
         if (sliderRest > 0) {
           position = position - slideWIdth * step
           sliderRest -= 1
+          currentSlideId += step
         }
       }
       if (dir === 'prev') {
         if (sliderRest < slidesCount - settings.slides) {
           position = position + slideWIdth * step
           sliderRest += 1
+          currentSlideId -= step
         }
       }
       $slider.style.left = position + 'px'
@@ -49,11 +53,10 @@ document.querySelectorAll("[data-myslider='slidercontainer']").forEach($sliderwr
   if (settings.dots) {
     (function generateDots() {
       const $dots = $sliderwrapper.querySelector("[data-myslider='dots']")
-      for (let i = 0; i < slidesCount - settings.slides; i++) {
-        $dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i}" data-myslider='dot'></div>`)
+      for (let i = 0; i < sectionCount; i++) {
+        $dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (settings.slides-1)}" data-myslider='dot'></div>`)
       }
       document.querySelector("[data-myslider='dot']").classList.add('active')
-      
       $dots.addEventListener('click', (e) => {
         if (e.target instanceof HTMLElement) {
           const $el = e.target
@@ -70,6 +73,7 @@ document.querySelectorAll("[data-myslider='slidercontainer']").forEach($sliderwr
             } else {
               move('next', slideId - currentId)   
             } 
+
           }
         }
       })
