@@ -1,0 +1,50 @@
+.myslider {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.myslider__slider {
+  margin: 0 -10px;
+  display: flex;
+  position: relative;
+  transition: left 0.5s;
+  left: 0;
+}
+
+.myslider__slide {
+  float: left;
+  height: 100px;
+  background: aquamarine;
+  margin: 0 10px;
+  margin-bottom: 10px;
+}
+
+.myslider__arrows {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.myslider__arrow {
+  padding: 10px 30px;
+  cursor: pointer;
+}
+.myslider__dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+.myslider__dots__button {
+  background: #d9d9d9;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin: 0 3px;
+  cursor: pointer;
+}
+.myslider__dots__button.active {
+  background: #009A92;
+}
