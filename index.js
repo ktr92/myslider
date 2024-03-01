@@ -33,12 +33,39 @@ class Myslider {
 
   }
 
+  activateDot(dots, id) {
+   
+    const activeDot = document.querySelector(`[data-mysliderdot="${id}"]`)
+    if (activeDot) {
+      dots.forEach(dot => {
+        dot.classList.remove('active')
+      })
+      activeDot.classList.add('active')
+    }
+
+  } 
+
   createDots() {
     const $dots = this.$el.querySelector("[data-myslider='dots']")
     for (let i = 0; i < this.sectionCount; i++) {
-      $dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (this.settings.slides-1)}" data-myslider='dot'></div>`)
+      $dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (this.settings.slides)}" data-myslider='dot'></div>`)
     }
     document.querySelector("[data-myslider='dot']").classList.add('active')
+    const dots = document.querySelectorAll('[data-mysliderdot]')
+
+
+    dots.forEach(el => {
+      el.addEventListener('click', (e) => {
+        const id = +e.target.dataset.mysliderdot
+        if (id < this.slidesCount - (this.settings.slides - 1)) {
+          this.activateSlide(id)
+
+        } else {
+          this.activateSlide(this.slidesCount - this.settings.slides)
+
+        }
+      })
+    })
     return $dots
   }
 
@@ -57,6 +84,9 @@ class Myslider {
         this.activeId = 0
        }
      }
+
+     this.activateDot(document.querySelectorAll('[data-mysliderdot]'), this.activeId)
+
 
      console.log(this)
   }
