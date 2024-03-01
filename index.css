@@ -5,15 +5,17 @@
 }
 
 .myslider__slider {
-  margin: 0 -10px;
   display: flex;
   position: relative;
   transition: left 0.5s;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+
   left: 0;
 }
 
 .myslider__slide {
-  float: left;
+/*   float: left; */
   height: 100px;
   background: aquamarine;
   margin: 0 10px;
