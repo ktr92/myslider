@@ -35,6 +35,7 @@ class Myslider {
     this.initSwipe()
 
     window.addEventListener('resize', () => {
+      this.activateSlide(0)
       this.sizeInit()
     })
   }
@@ -75,7 +76,7 @@ class Myslider {
     for (let i = 0; i < this.sectionCount; i++) {
       this.$dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (this.slidesVisible)}" data-myslider-dotid='${this.sliderID}'></div>`)
     }
-    const dots = document.querySelectorAll('[data-myslider-dotid]')
+    const dots = document.querySelectorAll(`[data-myslider-dotid='${this.sliderID}']`)
     dots[0].classList.add('active')
 
     dots.forEach(el => {
@@ -95,7 +96,7 @@ class Myslider {
   }
 
   activateDot(dots, id) {
-    const activeDot = document.querySelector(`[data-mysliderdot="${id}"]`)
+    const activeDot = document.querySelector(`[data-mysliderdot="${id}"][data-myslider-dotid='${this.sliderID}']`)
     if (activeDot) {
       dots.forEach(dot => {
         dot.classList.remove('active')
@@ -180,5 +181,15 @@ const slider = new Myslider("[data-myslider-container='sliderID']", {
       width: 480,
       slides: 1
     }
+  ]
+})
+const slider2 = new Myslider("[data-myslider-container='slider2']", {
+  slides: 2,
+  responsive: [
+    {
+      width: 992,
+      slides: 1
+    },
+  
   ]
 })

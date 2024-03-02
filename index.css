@@ -1,20 +1,29 @@
-
-
-.myslider {
+[data-myslider-container] {
   width: 100%;
   overflow: hidden;
   position: relative;
 }
-
-.myslider__slider {
+[data-myslider-slider] {
   display: flex;
   position: relative;
   transition: left 0.5s;
   overflow-x: hidden;
   scroll-behavior: smooth;
-
   left: 0;
 }
+
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+}
+.myslider {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 40px;
+}
+
 
 .myslider__slide {
 /*   float: left; */
