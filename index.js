@@ -1,18 +1,64 @@
 class Myslider {
   constructor(selector, settings) {
     this.settings = settings
+    this.slidesVisible = settings.slides ?? 1
+    this.screen = 1920
     this.$el = document.querySelector(selector) 
     this.$slider = this.$el.querySelector("[data-myslider='slider']")
+    this.$next = this.$el.querySelector("[data-myslider='next']")
+    this.$prev = this.$el.querySelector("[data-myslider='prev']")
+    this.$dots = this.$el.querySelector("[data-myslider='dots']")
+    this.dotsItems = null
     this.activeId = 0
-    this.slideWIdth = window.innerWidth / this.settings.slides
+    this.slideWIdth =  this.$el.offsetWidth / this.slidesVisible
     this.slidesCount = this.$slider.querySelectorAll("[data-myslider='slide']").length
-    this.sectionCount = Math.ceil(this.slidesCount / this.settings.slides)
-    this.dots = this.createDots()
+    this.sectionCount = Math.ceil(this.slidesCount / this.slidesVisible)
     this.position = this.$slider.style.left
+    this.responsive = settings.responsive ?? null
     this.sliderInit()
   }
 
+
   sliderInit() {
+    this.sizeInit()
+    if (this.$next && this.$prev) {
+      this.arrowsInit()
+    }
+    if (this.$dots) {
+      this.dotsInit()
+    }
+    if (this.responsive && this.responsive.length > 0) {
+      this.responsive.unshift({width: this.screen, slides: this.settings.slides ?? 1})
+    }
+    this.initSwipe()
+
+    window.addEventListener('resize', () => {
+      this.sizeInit()
+    })
+  }
+
+  arrowsInit() {
+    this.$next.addEventListener('click', () => {
+      this.activateSlide(this.activeId + 1)
+    });
+
+    this.$prev.addEventListener('click', () => {
+      this.activateSlide(this.activeId - 1)
+    });
+  }
+  
+  sizeInit() {
+    if (this.responsive && this.responsive.length) {
+      this.responsive.forEach((size, index) => {
+        if (size.width > window.innerWidth) {
+          this.screen = size.width
+          this.slidesVisible = size.slides
+        }
+      })
+    }
+    
+    this.slideWIdth = this.$el.offsetWidth / this.slidesVisible
+
     let index = 0
     this.$slider.style.width = this.slideWIdth * this.slidesCount + 'px'
     this.$slider.querySelectorAll("[data-myslider='slide']").forEach($slide => {
@@ -20,35 +66,12 @@ class Myslider {
       $slide.dataset.mysliderid = index
       index++
     })
-
-    const $next = this.$el.querySelector("[data-myslider='next']")
-    $next.addEventListener('click', () => {
-      this.activateSlide(this.activeId + 1)
-    });
-
-    const $prev = this.$el.querySelector("[data-myslider='prev']")
-    $prev.addEventListener('click', () => {
-      this.activateSlide(this.activeId - 1)
-    });
-
   }
 
-  activateDot(dots, id) {
-   
-    const activeDot = document.querySelector(`[data-mysliderdot="${id}"]`)
-    if (activeDot) {
-      dots.forEach(dot => {
-        dot.classList.remove('active')
-      })
-      activeDot.classList.add('active')
-    }
-
-  } 
-
-  createDots() {
-    const $dots = this.$el.querySelector("[data-myslider='dots']")
+  dotsInit() {
+  
     for (let i = 0; i < this.sectionCount; i++) {
-      $dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (this.settings.slides)}" data-myslider='dot'></div>`)
+      this.$dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (this.slidesVisible)}" data-myslider='dot'></div>`)
     }
     document.querySelector("[data-myslider='dot']").classList.add('active')
     const dots = document.querySelectorAll('[data-mysliderdot]')
@@ -57,25 +80,38 @@ class Myslider {
     dots.forEach(el => {
       el.addEventListener('click', (e) => {
         const id = +e.target.dataset.mysliderdot
-        if (id < this.slidesCount - (this.settings.slides - 1)) {
+        if (id < this.slidesCount - (this.slidesVisible - 1)) {
           this.activateSlide(id)
 
         } else {
-          this.activateSlide(this.slidesCount - this.settings.slides)
+          this.activateSlide(this.slidesCount - this.slidesVisible)
 
         }
       })
     })
-    return $dots
+
+    this.dotsItems = dots
   }
+
+  activateDot(dots, id) {
+    const activeDot = document.querySelector(`[data-mysliderdot="${id}"]`)
+    if (activeDot) {
+      dots.forEach(dot => {
+        dot.classList.remove('active')
+      })
+      activeDot.classList.add('active')
+    }
+  } 
+
+ 
 
   activateSlide(n) {
     if (n < 0) {
-      this.position = this.slideWIdth * (this.slidesCount - this.settings.slides)
+      this.position = this.slideWIdth * (this.slidesCount - this.slidesVisible)
       this.$slider.style.left = -this.position + 'px'
-      this.activeId = this.slidesCount - this.settings.slides
+      this.activeId = this.slidesCount - this.slidesVisible
      } else {
-      if (n < this.slidesCount - (this.settings.slides - 1)) {
+      if (n < this.slidesCount - (this.slidesVisible - 1)) {
         this.position = this.slideWIdth * n
         this.$slider.style.left = -this.position + 'px'
         this.activeId = n
@@ -85,190 +121,38 @@ class Myslider {
        }
      }
 
-     this.activateDot(document.querySelectorAll('[data-mysliderdot]'), this.activeId)
+     this.activateDot(this.dotsItems, this.activeId)
 
-
-     console.log(this)
   }
 
-}
-
-const slider = new Myslider("[data-myslider='slidercontainer']", {
-  slides: 3
-})
-console.log(slider)
-
-/* 
-document.querySelectorAll("[data-myslider='slidercontainer']").forEach($sliderwrapper => {
-  const settings = {
-    slides: 3,
-    dots: true,
-    swipe: true
-  }
-  const state = {
-    currentSlide: 0,
-    currentSection: 1,
-    sectionRest: 0,
-    slidesRest: 0,
-    slidesPrev: 0,
-    slidesCount: 0,
-    sectionsCount: 0,
-    slidesOver: 0
-  }
-  const $slider = $sliderwrapper.querySelector("[data-myslider='slider']")
-  let slideWIdth =  window.innerWidth / settings.slides
-  let slidesCount = $slider.querySelectorAll("[data-myslider='slide']").length
-  const sectionCount = Math.ceil(slidesCount / settings.slides)
-  $slider.style.width = slideWIdth * slidesCount + 'px'
-  let index = 0
-  $slider.querySelectorAll("[data-myslider='slide']").forEach($slide => {
-    $slide.style.width =  slideWIdth + 'px'
-    $slide.dataset.mysliderid = index
-    index++
-  })
-
-
-  state.sectionsCount = Math.ceil(slidesCount / settings.slides)
-
-  state.sectionRest = Math.floor(slidesCount / settings.slides)
-
-  state.slidesOver = slidesCount - Math.ceil(slidesCount / state.sectionRest)
-
-  let position = $slider.style.left
-  state.slidesRest = slidesCount - 1
-  console.log(state)
-  const move = (dir, step, isarrow = false) => {
-      if (dir === 'next') {
-        if (state.slidesRest > 0) {
-          if (isarrow && state.slidesCount >= settings.slides - 1 ) {
-            const $dotnext = document.querySelector("[data-myslider='dot'].active")
-            $dotnext.classList.remove('active')
-            $dotnext.nextElementSibling.classList.add('active')
-            state.currentSection += 1
-            state.slidesCount = 0
-          } else {
-            state.slidesCount += step
-
-          }
-          if (state.slidesRest < step) {
-            step -= state.slidesRest
-          }
-          position = position - slideWIdth * step
-          state.slidesRest -= step
-          state.currentSlide += step
-          state.slidesPrev += step
-        }
-       
-      }
-      if (dir === 'prev') {
-        if (state.slidesPrev > 0 ) {
-          if (isarrow && state.slidesCount <= settings.slides - 1 && state.currentSection > 1) {
-            const $dotprev = document.querySelector("[data-myslider='dot'].active")
-            $dotprev.classList.remove('active')
-            $dotprev.previousElementSibling.classList.add('active')
-            state.currentSection -= 1
-            state.slidesCount = settings.slides - 1
-          }else {
-            state.slidesCount -= step
-
-          }
-          if (state.slidesRest < step) {
-            step -= state.slidesRest
-          }
-          position = position + slideWIdth * step
-          state.slidesRest += step
-          state.currentSlide -= step
-          state.slidesPrev -= step
-        
-        }
-      
-      }
-      console.log(state)
-      $slider.style.left = position + 'px'
-    }
-
-
-
-  const $next = $sliderwrapper.querySelector("[data-myslider='next']")
-  $next.addEventListener('click', () => {
-    move('next', 1, true)
-  });
-
-  const $prev = $sliderwrapper.querySelector("[data-myslider='prev']")
-  $prev.addEventListener('click', () => {
-    move('prev', 1, true)   
-  });
-
-  if (settings.dots) {
-    (function generateDots() {
-      const $dots = $sliderwrapper.querySelector("[data-myslider='dots']")
-      for (let i = 0; i < sectionCount; i++) {
-        $dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (settings.slides-1)}" data-myslider='dot'></div>`)
-      }
-      document.querySelector("[data-myslider='dot']").classList.add('active')
-      $dots.addEventListener('click', (e) => {
-        if (e.target instanceof HTMLElement) {
-          const $el = e.target
-          if ($el.dataset.mysliderdot) {
-            const slideId =  $el.dataset.mysliderdot
-            const currentId = document.querySelector("[data-myslider='dot'].active").dataset.mysliderdot
-            document.querySelectorAll("[data-myslider='dot']").forEach(dot => {
-              dot.classList.remove('active')
-            })
-            $el.classList.add('active')
-
-            if (currentId > slideId) {
-              move('prev', currentId - slideId, false)  
-              state.currentSection -= 1
-             
-            } else {
-              move('next', slideId - currentId, false)   
-              state.currentSection += 1
-            } 
-
-          }
-        }
-      })
-    })()
-  }
-
-
-
-  if (settings.swipe) {
-    (function swipe(){
-
-      $sliderwrapper.addEventListener("touchstart", startTouch, false);
-      $sliderwrapper.addEventListener("touchmove", moveTouch, false);
-     
-       // Swipe Up / Down / Left / Right
+  initSwipe() {
        let initialX = null;
-       let initialY = null;
-     
-       function startTouch(e) {
+       let initialY = null;    
+
+       const startTouch = (e) => {
          initialX = e.touches[0].clientX;
          initialY = e.touches[0].clientY;
-       };
-     
-       function moveTouch(e) {
+       };     
+
+       const moveTouch = (e) => {
          if (initialX === null) {
            return;
-         }
-     
+         } 
+
          if (initialY === null) {
            return;
-         }
-     
+         }  
+
          let currentX = e.touches[0].clientX;
-         let currentY = e.touches[0].clientY;
-     
+         let currentY = e.touches[0].clientY;    
          let diffX = initialX - currentX;
          let diffY = initialY - currentY;
-     
+    
          if (Math.abs(diffX) > Math.abs(diffY)) {
            if (diffX > 0) {
-             move('next')
+            this.activateSlide(this.activeId + 1)
            } else {
-             move('prev')
+            this.activateSlide(this.activeId - 1)
            }  
          } 
      
@@ -277,10 +161,23 @@ document.querySelectorAll("[data-myslider='slidercontainer']").forEach($sliderwr
      
          e.preventDefault();
        };
-     }())
+
+       this.$slider.addEventListener("touchstart", startTouch, false);
+       this.$slider.addEventListener("touchmove", moveTouch, false);
   }
 
- 
+}
 
-
-}) */
+const slider = new Myslider("[data-myslider='slidercontainer']", {
+  slides: 3,
+  responsive: [
+    {
+      width: 992,
+      slides: 2
+    },
+    {
+      width: 480,
+      slides: 1
+    }
+  ]
+})
