@@ -2,16 +2,18 @@ class Myslider {
   constructor(selector, settings) {
     this.settings = settings
     this.slidesVisible = settings.slides ?? 1
-    this.screen = 1920
+    this.screen = window.screen.width
     this.$el = document.querySelector(selector) 
-    this.$slider = this.$el.querySelector("[data-myslider='slider']")
-    this.$next = this.$el.querySelector("[data-myslider='next']")
-    this.$prev = this.$el.querySelector("[data-myslider='prev']")
-    this.$dots = this.$el.querySelector("[data-myslider='dots']")
+    this.sliderID = this.$el.dataset.mysliderContainer
+    this.$slider = this.$el.querySelector(`[data-myslider-slider='${this.sliderID}']`)
+    this.$next = document.querySelector(`[data-myslider-next='${this.sliderID}']`)
+    this.$prev = document.querySelector(`[data-myslider-prev='${this.sliderID}']`)
+    this.$dots = document.querySelector(`[data-myslider-dots='${this.sliderID}']`)
     this.dotsItems = null
     this.activeId = 0
     this.slideWIdth =  this.$el.offsetWidth / this.slidesVisible
-    this.slidesCount = this.$slider.querySelectorAll("[data-myslider='slide']").length
+    this.slides = this.$slider.querySelectorAll(`[data-myslider-slide='${this.sliderID}']`)
+    this.slidesCount =  this.slides.length
     this.sectionCount = Math.ceil(this.slidesCount / this.slidesVisible)
     this.position = this.$slider.style.left
     this.responsive = settings.responsive ?? null
@@ -61,7 +63,7 @@ class Myslider {
 
     let index = 0
     this.$slider.style.width = this.slideWIdth * this.slidesCount + 'px'
-    this.$slider.querySelectorAll("[data-myslider='slide']").forEach($slide => {
+    this.slides.forEach($slide => {
       $slide.style.width =  this.slideWIdth + 'px'
       $slide.dataset.mysliderid = index
       index++
@@ -71,11 +73,10 @@ class Myslider {
   dotsInit() {
   
     for (let i = 0; i < this.sectionCount; i++) {
-      this.$dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (this.slidesVisible)}" data-myslider='dot'></div>`)
+      this.$dots.insertAdjacentHTML('beforeend', `<div class="myslider__dots__button" data-mysliderdot="${i * (this.slidesVisible)}" data-myslider-dotid='${this.sliderID}'></div>`)
     }
-    document.querySelector("[data-myslider='dot']").classList.add('active')
-    const dots = document.querySelectorAll('[data-mysliderdot]')
-
+    const dots = document.querySelectorAll('[data-myslider-dotid]')
+    dots[0].classList.add('active')
 
     dots.forEach(el => {
       el.addEventListener('click', (e) => {
@@ -168,7 +169,7 @@ class Myslider {
 
 }
 
-const slider = new Myslider("[data-myslider='slidercontainer']", {
+const slider = new Myslider("[data-myslider-container='sliderID']", {
   slides: 3,
   responsive: [
     {

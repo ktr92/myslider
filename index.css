@@ -1,3 +1,5 @@
+
+
 .myslider {
   width: 100%;
   overflow: hidden;
@@ -30,7 +32,6 @@
 }
 
 .myslider__arrow {
-  padding: 10px 30px;
   cursor: pointer;
 }
 .myslider__dots {
